@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASCENT — Interactive Parallax Scrolling Odyssey</title>
+  <meta name="description" content="A multi-layered interactive parallax journey from the depths of the ocean to the edge of the cosmic singularity.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Ambient Dynamic Star & Particle Canvas Background -->
+  <canvas id="ambient-canvas"></canvas>
+
+  <!-- Interactive Custom Cursor -->
+  <div class="cursor-dot" id="cursor-dot"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <!-- Audio Synthesizer Status & Notification Banner -->
+  <div class="toast-notification" id="toast-notification"></div>
+
+  <!-- TOP NAVIGATION & CONTROLS -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <div class="brand-glyph">
+        <svg viewBox="0 0 32 32" width="22" height="22">
+          <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 2"/>
+          <polygon points="16,6 23,23 16,19 9,23" fill="currentColor"/>
+        </svg>
+      </div>
+      <span class="brand-name">ASCENT</span>
+      <span class="brand-badge">ODYSSEY</span>
+    </div>
+
+    <!-- Quick Navigation Pills -->
+    <nav class="nav-pills" id="nav-pills">
+      <button class="nav-pill active" data-target="hero">Nexus</button>
+      <button class="nav-pill" data-target="abyss">-11,000m</button>
+      <button class="nav-pill" data-target="twilight">-500m</button>
+      <button class="nav-pill" data-target="highlands">+1,200m</button>
+      <button class="nav-pill" data-target="stratosphere">+18,000m</button>
+      <button class="nav-pill" data-target="orbit">+420km</button>
+      <button class="nav-pill" data-target="singularity">+∞</button>
+    </nav>
+
+    <!-- Top Action Controls -->
+    <div class="nav-actions">
+      <!-- Audio Synth Toggle -->
+      <button class="btn-icon" id="btn-audio" title="Toggle Generative Soundscape" aria-label="Toggle Sound">
+        <svg class="icon-sound-on" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+        </svg>
+        <svg class="icon-sound-off" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <line x1="23" y1="9" x2="17" y2="15"/>
+          <line x1="17" y1="9" x2="23" y2="15"/>
+        </svg>
+        <span class="btn-label">SOUND</span>
+      </button>
+
+      <!-- Autopilot / Auto Scroll -->
+      <button class="btn-icon" id="btn-autopilot" title="Toggle Autopilot Cruise Mode">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        <span class="btn-label">AUTOPILOT</span>
+      </button>
+
+      <!-- Artifact Codex / Discoveries -->
+      <button class="btn-codex" id="btn-codex" title="Open Expedition Codex">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        <span>CODEX</span>
+        <span class="badge-count" id="codex-counter">0/6</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- TELEMETRY / ALTIMETER HUD (RIGHT SIDEBAR) -->
+  <aside class="telemetry-hud" id="telemetry-hud">
+    <div class="hud-box">
+      <div class="hud-label">ALTITUDE / DEPTH</div>
+      <div class="hud-value" id="hud-altitude">0 m</div>
+      <div class="hud-sub" id="hud-zone">SURFACE NEXUS</div>
+    </div>
+
+    <!-- Vertical Waypoint Track -->
+    <div class="altimeter-track">
+      <div class="altimeter-indicator" id="altimeter-indicator"></div>
+      <div class="waypoint-marker" data-step="0" title="Nexus"></div>
+      <div class="waypoint-marker" data-step="1" title="Mariana Abyss (-11,000m)"></div>
+      <div class="waypoint-marker" data-step="2" title="Coral Twilight (-500m)"></div>
+      <div class="waypoint-marker" data-step="3" title="Emerald Highlands (+1,200m)"></div>
+      <div class="waypoint-marker" data-step="4" title="Stratosphere (+18,000m)"></div>
+      <div class="waypoint-marker" data-step="5" title="Orbital Station (+420km)"></div>
+      <div class="waypoint-marker" data-step="6" title="Cosmic Singularity (+∞)"></div>
+    </div>
+
+    <div class="hud-velocity">
+      <span class="hud-label">VELOCITY</span>
+      <span class="velocity-num" id="hud-velocity">0.00</span>
+      <span class="velocity-unit">m/s</span>
+    </div>
+  </aside>
+
+  <!-- WARP DRIVE / INTERACTION OVERLAYS -->
+  <div class="warp-speed-streak" id="warp-streaks"></div>
+
+  <!-- MAIN SCROLL CONTAINER -->
+  <main class="parallax-viewport" id="viewport">
+
+    <!-- ==============================================
+         SECTION 0: HERO NEXUS
+    =============================================== -->
+    <section class="scene-section hero-section" id="hero" data-zone="SURFACE NEXUS" data-alt="0 m">
+      <!-- Background Star Layers -->
+      <div class="parallax-layer layer-bg" data-speed="0.1" data-tilt="0.02">
+        <div class="celestial-nebula nebula-nexus"></div>
+        <div class="deep-grid-floor"></div>
+      </div>
+
+      <!-- Midground Rings & Geometric Astral Device -->
+      <div class="parallax-layer layer-mid" data-speed="0.35" data-tilt="0.06">
+        <div class="astral-gyroscope" id="astral-gyro">
+          <div class="ring ring-outer"></div>
+          <div class="ring ring-middle"></div>
+          <div class="ring ring-inner"></div>
+          <div class="gyro-core"></div>
+        </div>
+      </div>
+
+      <!-- Interactive Scene Content -->
+      <div class="parallax-layer layer-content" data-speed="0.65" data-tilt="0.1">
+        <div class="hero-content-box">
+          <div class="hero-tag">MULTIDIMENSIONAL PARALLAX EXPERIENCE</div>
+          <h1 class="hero-title">
+            <span class="gradient-text-hero">VERTICAL</span>
+            <span class="outline-text-hero">ODYSSEY</span>
+          </h1>
+          <p class="hero-desc">
+            Explore 6 immersive realms across planetary strata. Experience deep parallax motion, 
+            spatial reactivity, generative soundscapes, and hidden anomalies as you descend and ascend through dimensions.
+          </p>
+          <div class="hero-cta-group">
+            <button class="btn-primary" id="btn-dive">
+              <span>BEGIN DESCENT</span>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <polyline points="19 12 12 19 5 12"></polyline>
+              </svg>
+            </button>
+            <button class="btn-secondary" id="btn-view-manual">
+              <span>EXPLORER GUIDE</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Foreground Floating Monoliths -->
+      <div class="parallax-layer layer-fg" data-speed="1.2" data-tilt="0.15">
+        <div class="floating-shard shard-1"></div>
+        <div class="floating-shard shard-2"></div>
+        <div class="floating-shard shard-3"></div>
+      </div>
+
+      <!-- Scroll Indicator Prompt -->
+      <div class="scroll-prompt">
+        <span class="prompt-text">SCROLL TO DIVE INTO THE ABYSS</span>
+        <div class="prompt-mouse">
+          <div class="mouse-wheel"></div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================
+         SECTION 1: THE MARIANA ABYSS (-11,000m)
+    =============================================== -->
+    <section class="scene-section abyss-section" id="abyss" data-zone="THE MARIANA ABYSS" data-alt="-11,000 m">
+      <!-- Far Oceanic Darkness & Trench Walls -->
+      <div class="parallax-layer layer-bg" data-speed="0.15" data-tilt="0.03">
+        <div class="ocean-trench-gradient"></div>
+        <div class="trench-silhouettes">
+          <!-- SVG Trench Canyon Silhouettes -->
+          <svg viewBox="0 0 1440 800" preserveAspectRatio="none" class="trench-svg-bg">
+            <path d="M0,0 L280,300 L220,550 L380,800 L0,800 Z" fill="rgba(2, 6, 23, 0.95)" />
+            <path d="M1440,0 L1150,260 L1220,530 L1080,800 L1440,800 Z" fill="rgba(2, 6, 23, 0.95)" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Hydrothermal Vents & Deep Sea Fauna -->
+      <div class="parallax-layer layer-mid" data-speed="0.4" data-tilt="0.07">
+        <div class="hydrothermal-vent vent-left">
+          <div class="vent-smoke"></div>
+          <div class="vent-spire"></div>
+        </div>
+        <div class="hydrothermal-vent vent-right">
+          <div class="vent-smoke"></div>
+          <div class="vent-spire"></div>
+        </div>
+
+        <!-- Bioluminescent Deep Jellyfish -->
+        <div class="bio-jellyfish jelly-1">
+          <div class="jelly-bell"></div>
+          <div class="jelly-tentacles">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="bio-jellyfish jelly-2">
+          <div class="jelly-bell"></div>
+          <div class="jelly-tentacles">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Title & Narrative Box -->
+      <div class="parallax-layer layer-content" data-speed="0.75" data-tilt="0.1">
+        <div class="realm-card realm-card-left">
+          <div class="realm-badge">ZONE I • HADAL ZONE</div>
+          <h2 class="realm-title">The Mariana Abyss</h2>
+          <div class="realm-depth-tag">-11,000 METERS • 1,100 ATM</div>
+          <p class="realm-desc">
+            In complete perpetual darkness under crushing pressure, ancient hydrothermal chimneys spew superheated minerals. 
+            Eerie bioluminescent organisms illuminate the ocean floor with pulse rhythms of neon indigo and electric violet.
+          </p>
+          <div class="realm-facts">
+            <div class="fact-item">
+              <span class="fact-label">Water Temp</span>
+              <span class="fact-val">1.2° C</span>
+            </div>
+            <div class="fact-item">
+              <span class="fact-label">Bioluminescence</span>
+              <span class="fact-val">94.8% Active</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Foreground Floating Hydrothermal Embers & Collectible -->
+      <div class="parallax-layer layer-fg" data-speed="1.25" data-tilt="0.14">
+        <div class="floating-kelp kelp-1"></div>
+        <div class="floating-kelp kelp-2"></div>
+
+        <!-- COLLECTIBLE ARTIFACT 1 -->
+        <div class="collectible-node" id="artifact-1" data-id="1" data-name="Abyssal Core Specimen" data-realm="Mariana Abyss" style="top: 55%; left: 75%;">
+          <div class="artifact-halo"></div>
+          <div class="artifact-gem gem-abyss">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#38bdf8" stroke-width="2">
+              <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/>
+              <line x1="12" y1="22" x2="12" y2="15.5"/>
+              <polyline points="22 8.5 12 15.5 2 8.5"/>
+            </svg>
+          </div>
+          <div class="artifact-tooltip">CLICK TO SCAN ARTIFACT [1/6]</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================
+         SECTION 2: THE CORAL TWILIGHT (-500m)
+    =============================================== -->
+    <section class="scene-section twilight-section" id="twilight" data-zone="THE CORAL TWILIGHT" data-alt="-500 m">
+      <!-- Sunlight Caustics & Water Columns -->
+      <div class="parallax-layer layer-bg" data-speed="0.2" data-tilt="0.04">
+        <div class="sunbeam-container">
+          <div class="sunbeam beam-1"></div>
+          <div class="sunbeam beam-2"></div>
+          <div class="sunbeam beam-3"></div>
+          <div class="sunbeam beam-4"></div>
+        </div>
+        <div class="distant-reef-silhouette"></div>
+      </div>
+
+      <!-- Midground Giant Manta & Coral Pillars -->
+      <div class="parallax-layer layer-mid" data-speed="0.45" data-tilt="0.08">
+        <!-- Giant Manta Ray Silhouette Floating Across -->
+        <div class="manta-ray" id="manta-ray">
+          <svg viewBox="0 0 300 160" width="300" height="160" fill="currentColor">
+            <path d="M150,10 C180,30 290,70 295,95 C270,95 210,85 180,95 C190,130 165,150 150,155 C135,150 110,130 120,95 C90,85 30,95 5,95 C10,70 120,30 150,10 Z" opacity="0.65"/>
+            <path d="M150,155 Q152,190 150,240" stroke="currentColor" stroke-width="2" fill="none" opacity="0.5"/>
+          </svg>
+        </div>
+
+        <div class="coral-cluster coral-left"></div>
+        <div class="coral-cluster coral-right"></div>
+      </div>
+
+      <!-- Narrative & Content Layer -->
+      <div class="parallax-layer layer-content" data-speed="0.75" data-tilt="0.1">
+        <div class="realm-card realm-card-right">
+          <div class="realm-badge">ZONE II • MESOPELAGIC</div>
+          <h2 class="realm-title">The Coral Twilight</h2>
+          <div class="realm-depth-tag">-500 METERS • 51 ATM</div>
+          <p class="realm-desc">
+            Sunlight pierces the cerulean waters in shimmering volumetric caustics. 
+            Vibrant bio-luminescent reefs and colossal pelagic wanderers glide in a timeless, weightless ballet.
+          </p>
+          <div class="realm-facts">
+            <div class="fact-item">
+              <span class="fact-label">Visibility</span>
+              <span class="fact-val">42 Meters</span>
+            </div>
+            <div class="fact-item">
+              <span class="fact-label">Biodiversity</span>
+              <span class="fact-val">Extreme</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Foreground Interactive Bubble Streams & Collectible -->
+      <div class="parallax-layer layer-fg" data-speed="1.3" data-tilt="0.16">
+        <div class="interactive-bubble-container" id="bubble-container">
+          <!-- Pop-able bubbles dynamically generated via JS & styled via CSS -->
+        </div>
+
+        <!-- COLLECTIBLE ARTIFACT 2 -->
+        <div class="collectible-node" id="artifact-2" data-id="2" data-name="Iridescent Nautilus" data-realm="Coral Twilight" style="top: 48%; left: 22%;">
+          <div class="artifact-halo"></div>
+          <div class="artifact-gem gem-twilight">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#2dd4bf" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10a10 10 0 0 1-7.07-2.93"/>
+              <path d="M12 6a6 6 0 0 1 6 6c0 3.314-2.686 6-6 6a6 6 0 0 1-4.24-1.76"/>
+            </svg>
+          </div>
+          <div class="artifact-tooltip">CLICK TO SCAN ARTIFACT [2/6]</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================
+         SECTION 3: THE EMERALD HIGHLANDS (+1,200m)
+    =============================================== -->
+    <section class="scene-section highlands-section" id="highlands" data-zone="THE EMERALD HIGHLANDS" data-alt="+1,200 m">
+      <!-- Distant Twilight Mountain Chains & Gradient Sky -->
+      <div class="parallax-layer layer-bg" data-speed="0.18" data-tilt="0.03">
+        <div class="highland-twilight-sky"></div>
+        <div class="mountain-range range-far">
+          <svg viewBox="0 0 1440 400" preserveAspectRatio="none">
+            <path d="M0,400 L0,220 L180,140 L350,210 L560,90 L740,190 L950,80 L1150,170 L1320,100 L1440,160 L1440,400 Z" fill="#061c16" />
+          </svg>
+        </div>
+        <div class="mountain-range range-near">
+          <svg viewBox="0 0 1440 400" preserveAspectRatio="none">
+            <path d="M0,400 L0,260 L240,180 L420,270 L650,160 L850,250 L1080,140 L1260,230 L1440,180 L1440,400 Z" fill="#082b22" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Mist, Pine Ridge, Ancient Shrine Spire -->
+      <div class="parallax-layer layer-mid" data-speed="0.45" data-tilt="0.08">
+        <div class="ridge-pine-trees"></div>
+        <div class="mystic-lantern-pillar">
+          <div class="lantern-glow"></div>
+        </div>
+        <div class="valley-mist"></div>
+      </div>
+
+      <!-- Narrative & Content Layer -->
+      <div class="parallax-layer layer-content" data-speed="0.8" data-tilt="0.11">
+        <div class="realm-card realm-card-left">
+          <div class="realm-badge">ZONE III • TERRESTRIAL CANOPY</div>
+          <h2 class="realm-title">The Emerald Highlands</h2>
+          <div class="realm-depth-tag">+1,200 METERS • 0.88 ATM</div>
+          <p class="realm-desc">
+            Breaching into the open atmosphere: ancient evergreen peaks pierce billowing sea mist. 
+            Luminous fireflies drift on the mountain breeze while auroral ribbons dance in the twilight sky.
+          </p>
+          <div class="realm-facts">
+            <div class="fact-item">
+              <span class="fact-label">Wind Vector</span>
+              <span class="fact-val">28 km/h NW</span>
+            </div>
+            <div class="fact-item">
+              <span class="fact-label">O₂ Density</span>
+              <span class="fact-val">Optimal (98%)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Foreground Tree Branches, Swaying Leaves & Collectible -->
+      <div class="parallax-layer layer-fg" data-speed="1.35" data-tilt="0.18">
+        <div class="fg-branch branch-left"></div>
+        <div class="fg-branch branch-right"></div>
+        
+        <!-- Interactive Fireflies Container -->
+        <div class="fireflies-field" id="fireflies-field"></div>
+
+        <!-- COLLECTIBLE ARTIFACT 3 -->
+        <div class="collectible-node" id="artifact-3" data-id="3" data-name="Verdant Runestone" data-realm="Emerald Highlands" style="top: 50%; left: 78%;">
+          <div class="artifact-halo"></div>
+          <div class="artifact-gem gem-highlands">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#34d399" stroke-width="2">
+              <polygon points="12 2 2 12 12 22 22 12 12 2"/>
+              <line x1="12" y1="6" x2="12" y2="18"/>
+              <line x1="6" y1="12" x2="18" y2="12"/>
+            </svg>
+          </div>
+          <div class="artifact-tooltip">CLICK TO SCAN ARTIFACT [3/6]</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================
+         SECTION 4: THE STRATOSPHERE & SKY ISLANDS (+18,000m)
+    =============================================== -->
+    <section class="scene-section stratosphere-section" id="stratosphere" data-zone="THE STRATOSPHERE" data-alt="+18,000 m">
+      <!-- High Altitude Sky, Earth Curvature, Sunset Aurora -->
+      <div class="parallax-layer layer-bg" data-speed="0.22" data-tilt="0.04">
+        <div class="stratosphere-gradient"></div>
+        <div class="earth-curvature-silhouette"></div>
+        <div class="solar-flare-flare"></div>
+      </div>
+
+      <!-- Floating Sky Islands & High-Altitude Airships -->
+      <div class="parallax-layer layer-mid" data-speed="0.5" data-tilt="0.09">
+        <div class="floating-island island-main">
+          <div class="island-spire"></div>
+          <div class="waterfall-mist"></div>
+        </div>
+        <div class="floating-island island-mini"></div>
+        <div class="sky-cruiser-silhouette"></div>
+      </div>
+
+      <!-- Narrative & Content Layer -->
+      <div class="parallax-layer layer-content" data-speed="0.8" data-tilt="0.12">
+        <div class="realm-card realm-card-right">
+          <div class="realm-badge">ZONE IV • STRATOPAUSE</div>
+          <h2 class="realm-title">The Stratosphere Realm</h2>
+          <div class="realm-depth-tag">+18,000 METERS • 0.07 ATM</div>
+          <p class="realm-desc">
+            Floating crystalline archipelagos suspended by levitating magnetic geodetic currents. 
+            The sky shifts from golden horizon dusk to midnight sapphire, where gravity begins its subtle release.
+          </p>
+          <div class="realm-facts">
+            <div class="fact-item">
+              <span class="fact-label">External Temp</span>
+              <span class="fact-val">-56.5° C</span>
+            </div>
+            <div class="fact-item">
+              <span class="fact-label">Levitation Flux</span>
+              <span class="fact-val">9.81 m/s² Inv</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Foreground Fluffy Cumulus & Crystalline Shards -->
+      <div class="parallax-layer layer-fg" data-speed="1.4" data-tilt="0.18">
+        <div class="cloud-layer cloud-fg-1"></div>
+        <div class="cloud-layer cloud-fg-2"></div>
+
+        <!-- COLLECTIBLE ARTIFACT 4 -->
+        <div class="collectible-node" id="artifact-4" data-id="4" data-name="Sky-Core Levitation Crystal" data-realm="Stratosphere" style="top: 52%; left: 24%;">
+          <div class="artifact-halo"></div>
+          <div class="artifact-gem gem-strato">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#f472b6" stroke-width="2">
+              <polygon points="6 2 18 2 22 8 12 22 2 8 6 2"/>
+              <line x1="2" y1="8" x2="22" y2="8"/>
+              <line x1="12" y1="22" x2="12" y2="8"/>
+            </svg>
+          </div>
+          <div class="artifact-tooltip">CLICK TO SCAN ARTIFACT [4/6]</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================
+         SECTION 5: ORBITAL OUTPOST (+420km)
+    =============================================== -->
+    <section class="scene-section orbit-section" id="orbit" data-zone="ORBITAL OUTPOST" data-alt="+420 km">
+      <!-- Blue Marble Earth Rim & Cosmic Starfield -->
+      <div class="parallax-layer layer-bg" data-speed="0.2" data-tilt="0.03">
+        <div class="earth-orbit-globe">
+          <div class="earth-atmosphere-glow"></div>
+          <div class="earth-night-lights"></div>
+        </div>
+      </div>
+
+      <!-- Space Station Modules, Rotating Habitat Ring & Tethered Astronaut -->
+      <div class="parallax-layer layer-mid" data-speed="0.55" data-tilt="0.09">
+        <div class="space-station-module">
+          <div class="hab-ring-rotator"></div>
+          <div class="comm-dish"></div>
+        </div>
+
+        <div class="floating-astronaut" id="floating-astronaut">
+          <div class="astronaut-body">
+            <div class="astro-helmet"></div>
+            <div class="astro-backpack"></div>
+          </div>
+          <div class="astro-tether"></div>
+        </div>
+      </div>
+
+      <!-- Narrative & Content Layer -->
+      <div class="parallax-layer layer-content" data-speed="0.8" data-tilt="0.12">
+        <div class="realm-card realm-card-left">
+          <div class="realm-badge">ZONE V • THERMOSPHERE / LEO</div>
+          <h2 class="realm-title">Orbital Station Aethelgard</h2>
+          <div class="realm-depth-tag">+420 KILOMETERS • 0 ATM (VACUUM)</div>
+          <p class="realm-desc">
+            Circling the planetary orb at 27,600 km/h. Earth sprawls below in breathtaking turquoise and cloud spirals. 
+            Free from gravitational shackles, solar array wings reflect radiant unfiltered solar flare bursts.
+          </p>
+          <div class="realm-facts">
+            <div class="fact-item">
+              <span class="fact-label">Orbital Velocity</span>
+              <span class="fact-val">7.66 km/s</span>
+            </div>
+            <div class="fact-item">
+              <span class="fact-label">Period</span>
+              <span class="fact-val">92.6 min</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Foreground Solar Panels & Orbit Debris & Collectible -->
+      <div class="parallax-layer layer-fg" data-speed="1.45" data-tilt="0.2">
+        <div class="solar-panel-array panel-left"></div>
+        <div class="solar-panel-array panel-right"></div>
+
+        <!-- COLLECTIBLE ARTIFACT 5 -->
+        <div class="collectible-node" id="artifact-5" data-id="5" data-name="Quantum Flight Recorder" data-realm="Orbital Outpost" style="top: 50%; left: 75%;">
+          <div class="artifact-halo"></div>
+          <div class="artifact-gem gem-orbit">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fbbf24" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M3 12h3m12 0h3M12 3v3m0 12v3"/>
+              <circle cx="12" cy="12" r="9"/>
+            </svg>
+          </div>
+          <div class="artifact-tooltip">CLICK TO SCAN ARTIFACT [5/6]</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ==============================================
+         SECTION 6: THE QUANTUM SINGULARITY (+∞)
+    =============================================== -->
+    <section class="scene-section singularity-section" id="singularity" data-zone="THE QUANTUM SINGULARITY" data-alt="+∞ LIGHTYEARS">
+      <!-- Accretion Disk Canvas & Relativistic Space Warp -->
+      <div class="parallax-layer layer-bg" data-speed="0.25" data-tilt="0.04">
+        <div class="singularity-core-glow"></div>
+        <canvas id="singularity-canvas"></canvas>
+      </div>
+
+      <!-- Relativistic Gravitational Rings & Quantum Monoliths -->
+      <div class="parallax-layer layer-mid" data-speed="0.6" data-tilt="0.1">
+        <div class="singularity-rings-container">
+          <div class="warp-portal-ring ring-1"></div>
+          <div class="warp-portal-ring ring-2"></div>
+          <div class="warp-portal-ring ring-3"></div>
+        </div>
+        <div class="tesseract-monolith"></div>
+      </div>
+
+      <!-- Narrative & Final Revelation Card -->
+      <div class="parallax-layer layer-content" data-speed="0.85" data-tilt="0.12">
+        <div class="realm-card realm-card-center">
+          <div class="realm-badge">ZONE VI • OMEGA SINGULARITY</div>
+          <h2 class="realm-title">The Quantum Nexus</h2>
+          <div class="realm-depth-tag">EVENT HORIZON • TIME DILATION: ∞</div>
+          <p class="realm-desc">
+            The fabric of spacetime bends into a self-folding kaleidoscope. All layers of depth, memory, 
+            and physical dimensions collapse into pure harmonic light and infinite possibilities.
+          </p>
+          <div class="singularity-action-box">
+            <button class="btn-primary btn-glow" id="btn-reascend">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+              <span>RE-ASCEND TO NEXUS</span>
+            </button>
+            <button class="btn-secondary" id="btn-hyperdrive">
+              <span>ENGAGE HYPERDRIVE</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Foreground Particle Burst & Final Collectible -->
+      <div class="parallax-layer layer-fg" data-speed="1.5" data-tilt="0.22">
+        <div class="singularity-dust-field"></div>
+
+        <!-- COLLECTIBLE ARTIFACT 6 -->
+        <div class="collectible-node" id="artifact-6" data-id="6" data-name="Cosmic Singularity Seed" data-realm="Quantum Singularity" style="top: 42%; left: 50%; transform: translateX(-50%);">
+          <div class="artifact-halo"></div>
+          <div class="artifact-gem gem-singularity">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#e879f9" stroke-width="2">
+              <polygon points="12 2 15 9 22 12 15 15 12 22 9 15 2 12 9 9 12 2"/>
+              <circle cx="12" cy="12" r="2" fill="#e879f9"/>
+            </svg>
+          </div>
+          <div class="artifact-tooltip">CLICK TO SCAN FINAL ARTIFACT [6/6]</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER EPILOGUE -->
+    <footer class="odyssey-footer">
+      <div class="footer-inner">
+        <div class="footer-logo">ASCENT</div>
+        <p class="footer-tagline">Crafted with high-performance CSS3 3D transforms, smooth dynamic physics, Web Audio synthesizer, and multi-speed parallax depth.</p>
+        <div class="footer-links">
+          <a href="#hero">Return to Top</a>
+          <span class="sep">•</span>
+          <a href="#" id="link-credits">Expedition Log</a>
+          <span class="sep">•</span>
+          <a href="#" id="link-controls">Keyboard Controls</a>
+        </div>
+        <p class="footer-copy">© Interactive Parallax Scrolling Page • Built for immersive web exploration.</p>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ==============================================
+       CODEX DRAWER / MODAL
+  =============================================== -->
+  <aside class="codex-drawer" id="codex-drawer" aria-hidden="true">
+    <div class="codex-header">
+      <div class="codex-title-wrap">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        <h3>EXPEDITION CODEX</h3>
+      </div>
+      <button class="btn-close" id="btn-close-codex" aria-label="Close Codex">&times;</button>
+    </div>
+
+    <div class="codex-progress-bar">
+      <div class="codex-fill" id="codex-fill" style="width: 0%;"></div>
+    </div>
+    <div class="codex-status-text" id="codex-status">0 OF 6 RELICS DISCOVERED</div>
+
+    <div class="codex-list" id="codex-list">
+      <!-- Populated dynamically via JS -->
+    </div>
+
+    <div class="codex-footer">
+      <p class="codex-hint">💡 Scroll through each zone and click glowing floating diamond markers to discover anomalies.</p>
+    </div>
+  </aside>
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+
+  <!-- INSTRUCTIONS MODAL -->
+  <div class="guide-modal" id="guide-modal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>ODYSSEY NAVIGATION GUIDE</h3>
+        <button class="btn-close" id="btn-close-guide">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="guide-grid">
+          <div class="guide-item">
+            <div class="guide-icon">🖱️</div>
+            <h4>Smooth Parallax</h4>
+            <p>Scroll using your mouse wheel, trackpad, or arrow keys. Layers move at differential velocities to simulate true stereoscopic depth.</p>
+          </div>
+          <div class="guide-item">
+            <div class="guide-icon">👀</div>
+            <h4>Spatial 3D Tilt</h4>
+            <p>Move your cursor across the screen. Every visual plane pivots dynamically in 3D perspective relative to your mouse position.</p>
+          </div>
+          <div class="guide-item">
+            <div class="guide-icon">🎵</div>
+            <h4>Generative Audio</h4>
+            <p>Click the <strong>SOUND</strong> button in the top navigation. Experience real-time synthesized drones and acoustic pitch shifts responsive to your altitude.</p>
+          </div>
+          <div class="guide-item">
+            <div class="guide-icon">💎</div>
+            <h4>Artifact Hunting</h4>
+            <p>Click on the glowing diamond artifacts hidden across the 6 zones to complete your Expedition Codex and unlock Overdrive.</p>
+          </div>
+          <div class="guide-item">
+            <div class="guide-icon">🚀</div>
+            <h4>Autopilot Mode</h4>
+            <p>Activate <strong>AUTOPILOT</strong> to enjoy a cinematic hands-free cruise through all vertical dimensions.</p>
+          </div>
+          <div class="guide-item">
+            <div class="guide-icon">⌨️</div>
+            <h4>Quick Keys</h4>
+            <p><kbd>Space</kbd> toggle autopilot • <kbd>M</kbd> mute/unmute audio • <kbd>C</kbd> open codex • <kbd>1-6</kbd> jump to zone.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="btn-close-guide-action">CONTINUE EXPEDITION</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
